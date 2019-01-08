@@ -63,7 +63,7 @@ def wait_for_updates(service_content, max_updates=100, max_wait=60):
     property_collector = service_content.propertyCollector
 
     while True:
-        objects = {}
+        objects = []
 
         result = property_collector.WaitForUpdatesEx(version, options=options)
         if result is None:
@@ -71,18 +71,22 @@ def wait_for_updates(service_content, max_updates=100, max_wait=60):
 
         for filter_set in result.filterSet:
             for object_update in filter_set.objectSet:
-                props = {}
-                for property_change in object_update.changeSet:
-                    props[property_change.name] = str(property_change.val)
-
                 obj = object_update.obj
-                obj_class = obj.__class__.__name__
-                obj_ref = str(object_update.obj)
 
-                if objects.get(obj_class) is None:
-                    objects[obj_class] = {}
+                props = {
+                    "obj": str(obj),
+                    "kind": object_update.kind,
+                    "changeSet": {},
+                    "missingSet": {}
+                }
 
-                objects[obj_class][obj_ref] = props
+                for property_change in object_update.changeSet:
+                    props["changeSet"][property_change.name] = str(property_change.val)
+
+                for missing_property in object_update.missingSet:
+                    props["missingSet"][missing_property.path] = str(property_change.fault)
+
+                objects.append(props)
 
         print("%s" % (json.dumps(objects)))
 
