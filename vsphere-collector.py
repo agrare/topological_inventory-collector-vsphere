@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 import atexit
+import json
 import os
-import ssl
 import pyVim.connect
 from pyVmomi import vim, vmodl
+import ssl
 
 def create_property_filter(service_content):
     filter_spec = vmodl.query.PropertyCollector.FilterSpec()
@@ -45,7 +46,8 @@ def create_property_filter(service_content):
         vmodl.query.PropertyCollector.PropertySpec(
             all=False,
             type=vim.VirtualMachine,
-            pathSet=["name"])
+            pathSet=["name", "config.uuid"]
+        )
     ]
 
     property_filter = service_content.propertyCollector.CreateFilter(filter_spec, True)
@@ -61,7 +63,7 @@ def wait_for_updates(service_content, max_updates=100, max_wait=60):
     property_collector = service_content.propertyCollector
 
     while True:
-        objects = []
+        objects = {}
 
         result = property_collector.WaitForUpdatesEx(version, options=options)
         if result is None:
@@ -69,10 +71,20 @@ def wait_for_updates(service_content, max_updates=100, max_wait=60):
 
         for filter_set in result.filterSet:
             for object_update in filter_set.objectSet:
-                obj = object_update.obj
-                print("Vm: %s" % (str(obj)))
+                props = {}
                 for property_change in object_update.changeSet:
-                    print(" %s = '%s'" % (property_change.name, str(property_change.val)))
+                    props[property_change.name] = str(property_change.val)
+
+                obj = object_update.obj
+                obj_class = obj.__class__.__name__
+                obj_ref = str(object_update.obj)
+
+                if objects.get(obj_class) is None:
+                    objects[obj_class] = {}
+
+                objects[obj_class][obj_ref] = props
+
+        print("%s" % (json.dumps(objects)))
 
         version = result.version
 

@@ -13,5 +13,5 @@ The collector accepts the following environment variables:
 Example:
 
 ```
-docker run -e VSPHERE_HOST=dev-vc67.example.local -e VSPHERE_USERNAME=root -e VSPHERE_PASSWORD=vmware agrare/topological_inventory-collector-vsphere:0.0.1
+docker run --rm -t -e VSPHERE_HOST=dev-vc67.example.local -e VSPHERE_USERNAME=root -e VSPHERE_PASSWORD=vmware agrare/topological_inventory-collector-vsphere:0.0.1
 ```
