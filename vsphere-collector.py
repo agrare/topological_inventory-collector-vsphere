@@ -88,7 +88,7 @@ def wait_for_updates(service_content, max_updates=100, max_wait=60):
 
                 objects.append(props)
 
-        print("version: %s: %s" % (result.version, json.dumps(objects)))
+        yield json.dumps(objects)
 
         version = result.version
 
@@ -112,7 +112,8 @@ def main():
         return -1
 
     create_property_filter(service_content)
-    wait_for_updates(service_content)
+    for payload in wait_for_updates(service_content):
+        print(payload)
 
 
 if __name__ == "__main__":
