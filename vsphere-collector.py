@@ -46,7 +46,7 @@ def create_property_filter(service_content):
         vmodl.query.PropertyCollector.PropertySpec(
             all=False,
             type=vim.VirtualMachine,
-            pathSet=["name", "config.uuid"]
+            pathSet=["name", "config.uuid", "runtime.powerState"]
         )
     ]
 
@@ -88,7 +88,7 @@ def wait_for_updates(service_content, max_updates=100, max_wait=60):
 
                 objects.append(props)
 
-        print("%s" % (json.dumps(objects)))
+        print("version: %s: %s" % (result.version, json.dumps(objects)))
 
         version = result.version
 
